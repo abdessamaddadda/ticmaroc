@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const socketIo = require('socket.io');
 const http = require('http');
 const cors = require('cors');
@@ -21,16 +20,10 @@ app.use(express.json());
 // Servir les fichiers statiques du dossier "client"
 app.use(express.static(path.join(__dirname, '../client')));
 
-// Connexion à MongoDB
-mongoose.connect('mongodb://localhost:27017/tic-tac-toe', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
 // Routes d'authentification
 app.use('/api/auth', authRoutes);
 
-// Gestion des connexions Socket.io
+// Variables du jeu
 let players = [];
 let currentPlayer = 'X';
 let gameState = ['', '', '', '', '', '', '', '', ''];
@@ -41,6 +34,7 @@ const winningConditions = [
   [0, 4, 8], [2, 4, 6]             // Diagonales
 ];
 
+// Connexion Socket.io
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
 
@@ -70,7 +64,6 @@ io.on('connection', (socket) => {
       const winner = checkForWinner();
       if (winner) {
         io.emit('gameOver', { winner, message: `Le joueur ${winner} a gagné !` });
-        updateScore(winner);
         resetGame();
       } else if (gameState.every(cell => cell !== '')) {
         io.emit('gameOver', { winner: null, message: 'Match nul !' });
@@ -108,19 +101,6 @@ function checkForWinner() {
     }
   }
   return null;
-}
-
-// Mettre à jour le score du gagnant
-async function updateScore(winnerSymbol) {
-  const winner = players.find(player => player.symbol === winnerSymbol);
-  if (winner) {
-    const user = await User.findOne({ username: winner.name });
-    if (user) {
-      user.score += 1;
-      await user.save();
-      io.emit('updateScore', { username: winner.name, score: user.score });
-    }
-  }
 }
 
 // Réinitialiser le jeu
