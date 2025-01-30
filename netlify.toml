@@ -1,0 +1,21 @@
+# Configuration du build pour Netlify
+[build]
+  # Dossier où se trouvent les fonctions serverless
+  functions = "netlify/functions"
+  # Dossier où se trouvent les fichiers de ton frontend (HTML, CSS, JS)
+  publish = "public"  # Assure-toi que ton frontend est dans ce dossier
+
+# Configuration pour la redirection et les en-têtes
+[[redirects]]
+  from = "/api/*"         # Les requêtes à /api/ seront redirigées vers les fonctions
+  to = "/.netlify/functions/:splat"  # Correspond aux fonctions dans netlify/functions/
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+# Configuration pour la gestion des plugins (si tu en utilises)
+[[plugins]]
+  package = "@netlify/plugin-functions-core"

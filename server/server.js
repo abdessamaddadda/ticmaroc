@@ -110,6 +110,9 @@ function resetGame() {
   players = [];
 }
 
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
 // Définir le port sur 5000
 const PORT = 5000;
 server.listen(PORT, () => {
